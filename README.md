@@ -30,7 +30,9 @@ drwxr-xr-x  4 root root 4096 Nov 28 13:56 code/
 drwxr-xr-x  8 root root 4096 Nov 28 13:56 .git/
 -rw-r--r--  1 root root 3649 Nov 28 13:56 site.yml
 ```
-Note: Please specify your source IP or Subnet in ```– iptables:``` section of the ```site.yml```:
+Note: 
+stats/stats	- username/password required to access the Haproxy stats http://<host-ip>:1936
+Please specify your source IP or Subnet in ```– iptables:``` section of the ```site.yml```:
 ```
 Iptables: Please change value of <source> to your IP or Subnet
   - iptables: chain=INPUT policy=DROP
