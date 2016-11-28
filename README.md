@@ -1,4 +1,4 @@
-Deploying Docker cluster with Ansible
+##Deploying Docker cluster with Ansible
 
 The cluster consists of:
 •	Load balancer HAProxy
