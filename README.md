@@ -1,9 +1,9 @@
 ##Deploying Docker cluster with Ansible
 
 The cluster consists of:
-•	Load balancer HAProxy
-•	2 nodes Web server Django/Python 1.10.3
-•	2 nodes (master/slave) PostgreSQL 5.3 database
+* Load balancer HAProxy
+* 2 nodes Web server Django/Python 1.10.3
+* 2 nodes (master/slave) PostgreSQL 5.3 database
 
 The deployment was performed on local VM Linux Ubuntu 16.04 with Ansible v. 2.2.0.0 and Docker v. 1.12.1 installed. 
 
