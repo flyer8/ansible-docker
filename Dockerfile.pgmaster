@@ -24,7 +24,6 @@ RUN /etc/init.d/postgresql start && psql --command "CREATE USER repuser WITH SUP
 	psql --command "CREATE USER admin WITH SUPERUSER PASSWORD 'admin';" &&\
 	psql --command "ALTER ROLE postgres WITH PASSWORD 'postgres';" &&\
 	psql --command "CREATE ROLE sshimanskiy WITH CREATEDB PASSWORD 'Ss140179';" &&\
-#	psql --command "CREATE DATABASE loyalty;" &&\
 	psql -d postgres -c "CREATE TABLE Users(UserID integer PRIMARY KEY, FullName varchar(40), Login varchar(20), HashPassword text, Email varchar(20), PhoneNumber varchar(20));" &&\
 	psql -d postgres -c "CREATE TABLE Permissions(PermissionID serial PRIMARY KEY, Name varchar(40));" &&\
 	psql -d postgres -c "CREATE TABLE UserPermissions(UserPermissionID serial PRIMARY KEY, UserID integer, PermissionID integer);" &&\

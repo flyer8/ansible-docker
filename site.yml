@@ -18,7 +18,7 @@
       dockerfile: Dockerfile.pgmaster
       name: loyalty/pg-master
 
-  - name: Launch Master DB container
+  - name: Run Master DB container
     docker_container:
       name: pg-master
       image: loyalty/pg-master
@@ -30,9 +30,9 @@
       env:
         POSTGRES_USER: 'postgres'
         POSTGRES_PASSWORD: 'postgres'
-        PGDATA: '/var/lib/postgresql/data/pgdata'
+        PGDATA: '/var/lib/postgresql'
       volumes:
-      - '/var/lib/postgresql/data'
+      - '/var/lib/postgresql'
 #      ports:
 #      - "5432:5432"
 
@@ -42,7 +42,7 @@
       dockerfile: Dockerfile.django
       name: loyalty/django_app
 
-  - name: Create Web App 1 container
+  - name: Run Web App 1 container
     docker_container:
       name: web1
       image: loyalty/django_app
@@ -55,7 +55,7 @@
       links:
       - pg-master
       volumes:
-      - code:/code
+      - ./code:/code
 #      ports:
 #      - "8000"
 #    with_sequence: start=1 end=2
@@ -66,7 +66,7 @@
       dockerfile: Dockerfile.pgslave
       name: loyalty/pg-slave
 
-  - name: Launch Slave DB container
+  - name: Run Slave DB container
     docker_container:
       name: pg-slave
       image: loyalty/pg-slave
@@ -78,14 +78,14 @@
       env:
         POSTGRES_USER: 'postgres'
         POSTGRES_PASSWORD: 'postgres'
-        PGDATA: '/var/lib/postgresql/data/pgdata'
+        PGDATA: '/var/lib/postgresql'
         REPLICATE_FROM: 'pg-master'
       links:
       - pg-master
-      volumes:
-      - '/var/lib/postgresql/data'
+#      volumes:
+#      - '/var/lib/postgresql'
 
-  - name: Create Web App 2 container
+  - name: Run Web App 2 container
     docker_container:
       name: web2
       image: loyalty/django_app
@@ -98,12 +98,12 @@
       links:
       - pg-master
       volumes:
-      - code:/code
+      - ./code:/code
 #      ports:
 #      - "8000"
 #    with_sequence: start=1 end=2
 
-  - name: Create load balancer
+  - name: Run load balancer
     docker_container:
       name: lb
       image: dockercloud/haproxy
@@ -119,3 +119,12 @@
       - web2
       volumes:
       - '/var/run/docker.sock:/var/run/docker.sock'
+
+# Iptables: Please change <source> to your IP or Subnet
+  - iptables: chain=INPUT policy=DROP
+  - iptables: chain=FORWARD policy=DROP
+  - iptables: action=append chain=INPUT protocol=tcp source=192.168.0.0/24 destination_port=22 jump=ACCEPT
+  - iptables: action=insert chain=FORWARD protocol=tcp source=192.168.0.0/24 jump=ACCEPT
+    become: yes
+  - name: Insert rule connection limit 5 for HTTP
+    command: /sbin/iptables -I DOCKER -p tcp -m connlimit --connlimit-above 5 --dport 80 -d 172.20.0.6 -j DROP
