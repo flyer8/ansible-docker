@@ -1,0 +1,36 @@
+FROM ubuntu
+
+RUN apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+RUN apt-get update && apt-get install -y python-software-properties software-properties-common postgresql-9.3 postgresql-client-9.3 postgresql-contrib-9.3
+
+USER postgres
+
+RUN rm -rf /var/lib/postgresql/9.3/main/*
+
+# /etc/postgresql/9.3/pg_hba.conf
+RUN echo "host all  all    0.0.0.0/0  md5"           >> /etc/postgresql/9.3/main/pg_hba.conf
+RUN echo "host replication repuser 172.20.0.3/0 md5" >> /etc/postgresql/9.3/main/pg_hba.conf
+
+RUN echo "listen_addresses    = '*'"         >> /etc/postgresql/9.3/main/postgresql.conf
+RUN echo "wal_level           = hot_standby" >> /etc/postgresql/9.3/main/postgresql.conf
+RUN echo "max_wal_senders     = 3"           >> /etc/postgresql/9.3/main/postgresql.conf
+RUN echo "wal_keep_segments   = 8"           >> /etc/postgresql/9.3/main/postgresql.conf
+RUN echo "checkpoint_segments = 8"           >> /etc/postgresql/9.3/main/postgresql.conf
+RUN echo "log_statement       = all"         >> /etc/postgresql/9.3/main/postgresql.conf
+
+RUN /usr/lib/postgresql/9.3/bin/initdb /var/lib/postgresql/9.3/main/
+RUN /etc/init.d/postgresql start && psql --command "CREATE USER repuser WITH SUPERUSER PASSWORD 'repuser';" &&\
+	psql --command "CREATE USER admin WITH SUPERUSER PASSWORD 'admin';" &&\
+	psql --command "ALTER ROLE postgres WITH PASSWORD 'postgres';" &&\
+	psql --command "CREATE ROLE sshimanskiy WITH CREATEDB PASSWORD 'Ss140179';" &&\
+#	psql --command "CREATE DATABASE loyalty;" &&\
+	psql -d postgres -c "CREATE TABLE Users(UserID integer PRIMARY KEY, FullName varchar(40), Login varchar(20), HashPassword text, Email varchar(20), PhoneNumber varchar(20));" &&\
+	psql -d postgres -c "CREATE TABLE Permissions(PermissionID serial PRIMARY KEY, Name varchar(40));" &&\
+	psql -d postgres -c "CREATE TABLE UserPermissions(UserPermissionID serial PRIMARY KEY, UserID integer, PermissionID integer);" &&\
+	psql -d postgres -c "INSERT INTO Users(userid, fullname, login, hashpassword, email, phonenumber) VALUES (1, 'Sergey Shimanskiy', 'flyer8', 'qwerty123', 'flyer8@yandex.ru', '+79119894977');" &&\
+	psql -d postgres -c "INSERT INTO Users(userid, fullname, login, hashpassword, email, phonenumber) VALUES (2, 'Ivan Ivanov', 'ivanov', 'qwerty123', 'ivanov@yandex.ru', '+79119894988');" &&\
+	psql -d postgres -c "INSERT INTO Users(userid, fullname, login, hashpassword, email, phonenumber) VALUES (3, 'Petr Petrov', 'petrov', 'qwerty123', 'petrov@yandex.ru', '+79119894999');"
+EXPOSE 5432
+VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
+CMD bash -c "/usr/lib/postgresql/9.3/bin/postgres -D /var/lib/postgresql/9.3/main -c config_file=/etc/postgresql/9.3/main/postgresql.conf;"

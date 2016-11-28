@@ -1,0 +1,17 @@
+{% block content %}
+{% for post in posts %}
+<!-- Getting data in table -->
+<table border="0" cellpadding="0" cellspacing="0" style="width:750px;">
+	<tbody>
+		<tr>
+			<td style="width: 20px;">{{ post.userid }}</td>
+			<td style="width: 150px;">{{ post.fullname }}</td>
+			<td style="width: 100px;">{{ post.login }}</td>
+			<td style="width: 100px;">{{ post.hashpassword }}</td>
+			<td style="width: 100px;">{{ post.email }}</td>
+			<td style="width: 100px;">{{ post.phonenumber }}</td>
+		</tr>
+	</tbody>
+</table>
+{% endfor %}
+{% endblock %}

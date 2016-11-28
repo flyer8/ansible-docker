@@ -1,0 +1,12 @@
+﻿---
+- hosts: localhost
+  become: yes
+  tasks:
+# Iptables: Please change <source> to your IP or Subnet
+  - iptables: chain=INPUT policy=DROP
+  - iptables: chain=FORWARD policy=DROP
+  - iptables: action=append chain=INPUT protocol=tcp source=192.168.0.0/24 destination_port=22 jump=ACCEPT
+  - iptables: action=insert chain=FORWARD protocol=tcp source=192.168.0.0/24 jump=ACCEPT
+    become: yes
+  - name: Apache | add apache iptable rule
+    command: /sbin/iptables -I DOCKER -p tcp -m connlimit --connlimit-above 5 --dport 80 -d 172.20.0.6 -j DROP

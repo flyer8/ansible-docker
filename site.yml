@@ -1,0 +1,121 @@
+---
+- hosts: localhost
+  become: yes
+  tasks:
+
+  - name: Create a network with options
+    docker_network:
+      name: LoyaltyNet
+      driver_options:
+        com.docker.network.bridge.name: LoyaltyNet
+      ipam_options:
+        subnet: '172.20.0.0/16'
+        gateway: 172.20.0.1
+
+  - name: Build DB image loyalty/pg-master
+    docker_image:
+      path: .
+      dockerfile: Dockerfile.pgmaster
+      name: loyalty/pg-master
+
+  - name: Launch Master DB container
+    docker_container:
+      name: pg-master
+      image: loyalty/pg-master
+      networks:
+        - name: LoyaltyNet
+          ipv4_address: "172.20.0.2"
+      state: started
+      restart_policy: always
+      env:
+        POSTGRES_USER: 'postgres'
+        POSTGRES_PASSWORD: 'postgres'
+        PGDATA: '/var/lib/postgresql/data/pgdata'
+      volumes:
+      - '/var/lib/postgresql/data'
+#      ports:
+#      - "5432:5432"
+
+  - name: Build Web App image loyalty/django_app
+    docker_image:
+      path: .
+      dockerfile: Dockerfile.django
+      name: loyalty/django_app
+
+  - name: Create Web App 1 container
+    docker_container:
+      name: web1
+      image: loyalty/django_app
+      networks:
+        - name: LoyaltyNet
+          ipv4_address: "172.20.0.4"
+      state: started
+      restart_policy: always
+      command: bash -c "python manage.py inspectdb > loyalty_app/models.py && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+      links:
+      - pg-master
+      volumes:
+      - code:/code
+#      ports:
+#      - "8000"
+#    with_sequence: start=1 end=2
+
+  - name: Build Slave DB image
+    docker_image:
+      path: .
+      dockerfile: Dockerfile.pgslave
+      name: loyalty/pg-slave
+
+  - name: Launch Slave DB container
+    docker_container:
+      name: pg-slave
+      image: loyalty/pg-slave
+      networks:
+        - name: LoyaltyNet
+          ipv4_address: "172.20.0.3"
+      state: started
+      restart_policy: always
+      env:
+        POSTGRES_USER: 'postgres'
+        POSTGRES_PASSWORD: 'postgres'
+        PGDATA: '/var/lib/postgresql/data/pgdata'
+        REPLICATE_FROM: 'pg-master'
+      links:
+      - pg-master
+      volumes:
+      - '/var/lib/postgresql/data'
+
+  - name: Create Web App 2 container
+    docker_container:
+      name: web2
+      image: loyalty/django_app
+      networks:
+        - name: LoyaltyNet
+          ipv4_address: "172.20.0.5"
+      state: started
+      restart_policy: always
+      command: bash -c "python manage.py inspectdb > loyalty_app/models.py && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+      links:
+      - pg-master
+      volumes:
+      - code:/code
+#      ports:
+#      - "8000"
+#    with_sequence: start=1 end=2
+
+  - name: Create load balancer
+    docker_container:
+      name: lb
+      image: dockercloud/haproxy
+      networks:
+        - name: LoyaltyNet
+          ipv4_address: "172.20.0.6"
+      ports:
+      - "80:80"
+      state: started
+      restart_policy: always
+      links:
+      - web1
+      - web2
+      volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
