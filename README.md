@@ -9,7 +9,7 @@ The deployment was performed on local VM Linux Ubuntu 16.04 with Ansible v. 2.2.
 
 1: First you need to make sure that the SSH keys were created for current user (root) with the appropriate permissions.
 
-2: In inventory file /etc/ansible/hosts was added:
+2: In inventory file ```/etc/ansible/hosts``` was added:
 ```
 [local]
 localhost
@@ -18,7 +18,7 @@ localhost
 ```
 git clone https://github.com/flyer8/loyalty-ans.git /opt/loyalty-ans
 ```
-The directory contains scripts of the Web application Django in code/, Dockerfile-files for building appropriate images and Ansible playbook site.yml for deploying the cluster. File docker-compose.yml is not used as it was needed for testing with Docker-compose tool.
+The directory contains scripts of the Web application Django in ```code/```, Dockerfile-files for building appropriate images and Ansible playbook ```site.yml``` for deploying the cluster. File ```docker-compose.yml``` is not used as it was needed for testing with Docker-compose tool.
 ```
 drwxr-xr-x  4 root root 4096 Nov 28 13:56 ./
 drwxr-xr-x 13 root root 4096 Nov 28 13:56 ../
@@ -30,7 +30,7 @@ drwxr-xr-x  4 root root 4096 Nov 28 13:56 code/
 drwxr-xr-x  8 root root 4096 Nov 28 13:56 .git/
 -rw-r--r--  1 root root 3649 Nov 28 13:56 site.yml
 ```
-Note: Please specify your source IP on Subnet in – iptables: section of the site.yml:
+Note: Please specify your source IP on Subnet in ```– iptables:``` section of the ```site.yml```:
 ```
 Iptables: Please change value of <source> to your IP or Subnet
   - iptables: chain=INPUT policy=DROP
@@ -41,7 +41,7 @@ Iptables: Please change value of <source> to your IP or Subnet
   - name: Insert rule connection limit 5 for HTTP
     command: /sbin/iptables -I DOCKER -p tcp -m connlimit --connlimit-above 5 --dport 80 -d 172.20.0.6 -j DROP
 ```
-4: Change directory /opt/loyalty-ans  and execute the command:
+4: Change directory ```/opt/loyalty-ans```  and execute the command:
 ```
 ansible-playbook -i hosts site.yml
 ```
