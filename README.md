@@ -7,14 +7,14 @@ The cluster consists of:
 
 The deployment was performed on local VM Linux Ubuntu 16.04 with Ansible v. 2.2.0.0 and Docker v. 1.12.1 installed. 
 
-1. First you need to make sure that the SSH keys were created for current user (root) with the appropriate permissions.
+1: First you need to make sure that the SSH keys were created for current user (root) with the appropriate permissions.
 
-2. In inventory file /etc/ansible/hosts was added:
+2: In inventory file /etc/ansible/hosts was added:
 ```
 [local]
 localhost
 ```
-3. Clone repository:
+3: Clone repository:
 ```
 git clone https://github.com/flyer8/loyalty-ans.git /opt/loyalty-ans
 ```
@@ -41,7 +41,7 @@ Iptables: Please change value of <source> to your IP or Subnet
   - name: Insert rule connection limit 5 for HTTP
     command: /sbin/iptables -I DOCKER -p tcp -m connlimit --connlimit-above 5 --dport 80 -d 172.20.0.6 -j DROP
 ```
-4. Change directory /opt/loyalty-ans  and execute the command:
+4: Change directory /opt/loyalty-ans  and execute the command:
 ```
 ansible-playbook -i hosts site.yml
 ```
