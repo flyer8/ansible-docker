@@ -45,3 +45,4 @@ Iptables: Please change value of <source> to your IP or Subnet
 ```
 ansible-playbook -i hosts site.yml
 ```
+See also: https://flylabs.blogspot.ru/2016/11/deploying-docker-cluster-with-ansible.html
