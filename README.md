@@ -9,7 +9,7 @@ The deployment was performed on local VM Linux Ubuntu 16.04 with Ansible v. 2.2.
 
 1: First you need to make sure that the SSH keys were created for current user (root) with the appropriate permissions.
 
-2: In inventory file ```/etc/ansible/hosts``` was added:
+2: In inventory file ```hosts``` was added:
 ```
 [local]
 localhost
